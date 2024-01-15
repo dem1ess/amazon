@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException
+} from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { hash } from 'argon2'
 import { PrismaService } from 'src/prisma.service'
@@ -56,8 +60,26 @@ export class UserService {
 		})
 	}
 
-	//TODO: Доделать избранные
 	async toggleFavorite(userId: number, productId: number) {
-		return { userId, productId }
+		const user = await this.byId(userId)
+
+		if (!user) throw new NotFoundException('User not found!')
+
+		const isExists = user.favorites.some(product => product.id === productId)
+
+		await this.prisma.user.update({
+			where: {
+				id: user.id
+			},
+			data: {
+				favorites: {
+					[isExists ? 'disconnect' : 'connect']: {
+						id: productId
+					}
+				}
+			}
+		})
+
+		return 'Success'
 	}
 }

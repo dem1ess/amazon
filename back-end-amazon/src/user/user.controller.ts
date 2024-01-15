@@ -1,4 +1,5 @@
 import {
+	Body,
 	Controller,
 	Get,
 	HttpCode,
@@ -20,7 +21,7 @@ export class UserController {
 	@Get('profile')
 	@Auth()
 	async getProfile(@CurrentUser('id') id: number) {
-		return this.userService.byId
+		return this.userService.byId(id)
 	}
 
 	@UsePipes(new ValidationPipe())
@@ -38,6 +39,6 @@ export class UserController {
 		@Param('productId') productId: string,
 		@CurrentUser('id') id: number
 	) {
-		return this.userService.toggleFavorite(id, productId)
+		return this.userService.toggleFavorite(id, +productId)
 	}
 }
